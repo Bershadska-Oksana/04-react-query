@@ -1,21 +1,29 @@
 .container {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
+  padding: 20px;
   text-align: center;
-  padding: 2rem;
 }
 
 form {
-  margin-bottom: 2rem;
+  margin-bottom: 20px;
 }
 
 input {
-  padding: 0.5rem;
-  width: 70%;
-  margin-right: 1rem;
+  padding: 8px;
+  width: 250px;
+  margin-right: 10px;
 }
 
 button {
-  padding: 0.5rem 1rem;
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
   cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
 }
