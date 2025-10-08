@@ -1,0 +1,21 @@
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 2rem;
+}
+
+form {
+  margin-bottom: 2rem;
+}
+
+input {
+  padding: 0.5rem;
+  width: 70%;
+  margin-right: 1rem;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
