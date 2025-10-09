@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { fetchMovies } from "../../services/movieService";
 import MovieList from "../MovieList/MovieList";
 import styles from "./App.module.css";
@@ -8,30 +8,51 @@ const App = () => {
   const [query, setQuery] = useState("");
   const [movies, setMovies] = useState<Movie[]>([]);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (!query.trim()) return;
-    const getMovies = async () => {
-      setLoading(true);
-      const data = await fetchMovies(query, page);
-      setMovies(data.results);
-      setTotalPages(data.total_pages);
-      setLoading(false);
-    };
-    getMovies();
-  }, [query, page]);
-
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
+
+    setLoading(true);
+    const data = await fetchMovies(query, 1);
+    setMovies(data.results);
     setPage(1);
+    setTotalPages(data.total_pages);
+    setLoading(false);
   };
 
-  const handlePageChange = (newPage: number) => {
+  const handlePageChange = async (newPage: number) => {
+    if (newPage === page) return;
+    setLoading(true);
+    const data = await fetchMovies(query, newPage);
+    setMovies(data.results);
     setPage(newPage);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setLoading(false);
+  };
+
+  const renderPagination = () => {
+    const pages = Array.from(
+      { length: Math.min(totalPages, 10) },
+      (_, i) => i + 1
+    );
+
+    return (
+      <div className={styles.pagination}>
+        {pages.map((num) => (
+          <button
+            key={num}
+            onClick={() => handlePageChange(num)}
+            className={`${styles.pageButton} ${
+              page === num ? styles.active : ""
+            }`}
+          >
+            {num}
+          </button>
+        ))}
+      </div>
+    );
   };
 
   return (
@@ -43,29 +64,14 @@ const App = () => {
           placeholder="Enter movie title..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          className={styles.input}
         />
-        <button type="submit" disabled={loading}>
+        <button type="submit" disabled={loading} className={styles.button}>
           {loading ? "Searching..." : "Search"}
         </button>
       </form>
-
-      <MovieList movies={movies} />
-
-      {movies.length > 0 && (
-        <div className={styles.pagination}>
-          {Array.from({ length: Math.min(totalPages, 10) }, (_, i) => (
-            <button
-              key={i + 1}
-              onClick={() => handlePageChange(i + 1)}
-              className={`${styles.pageBtn} ${
-                page === i + 1 ? styles.activePage : ""
-              }`}
-            >
-              {i + 1}
-            </button>
-          ))}
-        </div>
-      )}
+      {movies.length > 0 && renderPagination()} <MovieList movies={movies} />
+      {movies.length > 0 && renderPagination()}{" "}
     </div>
   );
 };
