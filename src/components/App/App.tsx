@@ -1,77 +1,94 @@
-import { useState } from "react";
+import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import ReactPaginate from "react-paginate";
+
+import SearchBar from "../SearchBar/SearchBar";
+import MovieGrid from "../MovieGrid/MovieGrid";
+import MovieModal from "../MovieModal/MovieModal";
+import Loader from "../Loader/Loader";
+import ErrorMessage from "../ErrorMessage/ErrorMessage";
+
 import { fetchMovies } from "../../services/movieService";
-import MovieList from "../MovieList/MovieList";
 import styles from "./App.module.css";
 import type { Movie } from "../../types/movie";
+import type { FetchMoviesResponse } from "../../services/movieService";
 
-const App = () => {
+const App: React.FC = () => {
   const [query, setQuery] = useState("");
-  const [movies, setMovies] = useState<Movie[]>([]);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!query.trim()) return;
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["movies", query, page],
+    queryFn: () => fetchMovies(query, page),
+    enabled: query.trim().length > 0,
+    keepPreviousData: true,
+  });
 
-    setLoading(true);
-    const data = await fetchMovies(query, 1);
-    setMovies(data.results);
+  const onSearch = (q: string) => {
+    setQuery(q);
     setPage(1);
-    setTotalPages(data.total_pages);
-    setLoading(false);
   };
 
-  const handlePageChange = async (newPage: number) => {
-    if (newPage === page) return;
-    setLoading(true);
-    const data = await fetchMovies(query, newPage);
-    setMovies(data.results);
-    setPage(newPage);
-    setLoading(false);
-  };
-
-  const renderPagination = () => {
-    const pages = Array.from(
-      { length: Math.min(totalPages, 10) },
-      (_, i) => i + 1
-    );
-
-    return (
-      <div className={styles.pagination}>
-        {pages.map((num) => (
-          <button
-            key={num}
-            onClick={() => handlePageChange(num)}
-            className={`${styles.pageButton} ${
-              page === num ? styles.active : ""
-            }`}
-          >
-            {num}
-          </button>
-        ))}
-      </div>
-    );
+  const handlePageClick = ({ selected }: { selected: number }) => {
+    setPage(selected + 1);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>🎬 Movie Search</h1>
-      <form onSubmit={handleSearch} className={styles.form}>
-        <input
-          type="text"
-          placeholder="Enter movie title..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className={styles.input}
+
+      <SearchBar onSearch={onSearch} />
+
+      {isLoading && <Loader />}
+
+      {isError && <ErrorMessage message="Error fetching movies" />}
+
+      {!isLoading && data && data.results.length === 0 && (
+        <ErrorMessage message="No movies found" />
+      )}
+
+      {data && data.results.length > 0 && (
+        <>
+          <ReactPaginate
+            breakLabel="..."
+            nextLabel="→"
+            previousLabel="←"
+            onPageChange={handlePageClick}
+            pageRangeDisplayed={5}
+            marginPagesDisplayed={1}
+            pageCount={Math.min(data.total_pages, 500)}
+            forcePage={page - 1}
+            containerClassName={styles.pagination}
+            activeClassName={styles.active}
+          />
+
+          <MovieGrid movies={data.results} onSelect={setSelectedMovie} />
+
+          {data.total_pages > 1 && (
+            <ReactPaginate
+              breakLabel="..."
+              nextLabel="→"
+              previousLabel="←"
+              onPageChange={handlePageClick}
+              pageRangeDisplayed={5}
+              marginPagesDisplayed={1}
+              pageCount={Math.min(data.total_pages, 500)}
+              forcePage={page - 1}
+              containerClassName={styles.pagination}
+              activeClassName={styles.active}
+            />
+          )}
+        </>
+      )}
+
+      {selectedMovie && (
+        <MovieModal
+          movie={selectedMovie}
+          onClose={() => setSelectedMovie(null)}
         />
-        <button type="submit" disabled={loading} className={styles.button}>
-          {loading ? "Searching..." : "Search"}
-        </button>
-      </form>
-      {movies.length > 0 && renderPagination()} <MovieList movies={movies} />
-      {movies.length > 0 && renderPagination()}{" "}
+      )}
     </div>
   );
 };

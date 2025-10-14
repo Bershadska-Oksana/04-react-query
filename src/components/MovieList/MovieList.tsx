@@ -1,24 +1,31 @@
+import { FC } from "react";
 import styles from "./MovieList.module.css";
-import type { Movie } from "../../types/movie";
+
+interface Movie {
+  id: number;
+  title: string;
+  poster_path: string;
+}
 
 interface MovieListProps {
   movies: Movie[];
 }
 
-const MovieList = ({ movies }: MovieListProps) => {
+const MovieList: FC<MovieListProps> = ({ movies }) => {
   return (
-    <ul className={styles.list}>
+    <ul className={styles.movieList}>
       {movies.map((movie) => (
-        <li key={movie.id}>
+        <li key={movie.id} className={styles.movieCard}>
           <img
             src={
               movie.poster_path
-                ? `https://image.tmdb.org/t/p/w200${movie.poster_path}`
-                : "https://via.placeholder.com/200x300?text=No+Image"
+                ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+                : "https://via.placeholder.com/500x750?text=No+Image"
             }
             alt={movie.title}
+            className={styles.poster}
           />
-          <p>{movie.title}</p>
+          <h3 className={styles.title}>{movie.title}</h3>
         </li>
       ))}
     </ul>
