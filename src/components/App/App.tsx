@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import ReactPaginate from "react-paginate";
 
 import SearchBar from "../SearchBar/SearchBar";
-import MovieGrid from "../MovieGrid/MovieGrid";
+import MovieList from "../MovieList/MovieList";
 import MovieModal from "../MovieModal/MovieModal";
 import Loader from "../Loader/Loader";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
@@ -64,7 +64,7 @@ const App: React.FC = () => {
             activeClassName={styles.active}
           />
 
-          <MovieGrid movies={data.results} onSelect={setSelectedMovie} />
+          <MovieList movies={data.results} />
 
           {data.total_pages > 1 && (
             <ReactPaginate
