@@ -67,7 +67,7 @@ const App: React.FC = () => {
             activeClassName={styles.active}
           />
 
-          <MovieList movies={data.results} onSelect={setSelectedMovie} />
+          <MovieGrid movies={data.results} onSelect={setSelectedMovie} />
 
           {data.total_pages > 1 && (
             <ReactPaginate
