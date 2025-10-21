@@ -1,4 +1,4 @@
-import { FC } from "react";
+import type { FC } from "react";
 import styles from "./MovieList.module.css";
 import type { Movie } from "../../types/movie";
 
