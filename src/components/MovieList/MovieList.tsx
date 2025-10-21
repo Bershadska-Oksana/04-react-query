@@ -1,21 +1,21 @@
 import { FC } from "react";
 import styles from "./MovieList.module.css";
-
-interface Movie {
-  id: number;
-  title: string;
-  poster_path: string;
-}
+import type { Movie } from "../../types/movie";
 
 interface MovieListProps {
   movies: Movie[];
+  onSelect: (movie: Movie) => void;
 }
 
-const MovieList: FC<MovieListProps> = ({ movies }) => {
+const MovieList: FC<MovieListProps> = ({ movies, onSelect }) => {
   return (
     <ul className={styles.movieList}>
       {movies.map((movie) => (
-        <li key={movie.id} className={styles.movieCard}>
+        <li
+          key={movie.id}
+          className={styles.movieCard}
+          onClick={() => onSelect(movie)}
+        >
           <img
             src={
               movie.poster_path

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import ReactPaginate from "react-paginate";
+import { Toaster, toast } from "react-hot-toast";
 
 import SearchBar from "../SearchBar/SearchBar";
 import MovieList from "../MovieList/MovieList";
@@ -11,7 +12,6 @@ import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import { fetchMovies } from "../../services/movieService";
 import styles from "./App.module.css";
 import type { Movie } from "../../types/movie";
-import type { FetchMoviesResponse } from "../../services/movieService";
 
 const App: React.FC = () => {
   const [query, setQuery] = useState("");
@@ -22,7 +22,7 @@ const App: React.FC = () => {
     queryKey: ["movies", query, page],
     queryFn: () => fetchMovies(query, page),
     enabled: query.trim().length > 0,
-    keepPreviousData: true,
+    placeholderData: keepPreviousData,
   });
 
   const onSearch = (q: string) => {
@@ -35,19 +35,22 @@ const App: React.FC = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  if (isError) {
+    toast.error("Error fetching movies");
+  }
+
+  if (!isLoading && data && data.results.length === 0) {
+    toast("No movies found");
+  }
+
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>🎬 Movie Search</h1>
 
-      <SearchBar onSearch={onSearch} />
+      <SearchBar onSubmit={onSearch} />
 
       {isLoading && <Loader />}
-
       {isError && <ErrorMessage message="Error fetching movies" />}
-
-      {!isLoading && data && data.results.length === 0 && (
-        <ErrorMessage message="No movies found" />
-      )}
 
       {data && data.results.length > 0 && (
         <>
@@ -64,7 +67,7 @@ const App: React.FC = () => {
             activeClassName={styles.active}
           />
 
-          <MovieList movies={data.results} />
+          <MovieList movies={data.results} onSelect={setSelectedMovie} />
 
           {data.total_pages > 1 && (
             <ReactPaginate
@@ -89,6 +92,8 @@ const App: React.FC = () => {
           onClose={() => setSelectedMovie(null)}
         />
       )}
+
+      <Toaster position="top-right" reverseOrder={false} />
     </div>
   );
 };

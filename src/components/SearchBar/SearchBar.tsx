@@ -1,25 +1,30 @@
-import { useState } from "react";
+import { FormEvent } from "react";
+import toast from "react-hot-toast";
 
-interface Props {
-  onSearch: (query: string) => void;
+interface SearchBarProps {
+  onSubmit: (query: string) => void;
 }
 
-const SearchBar = ({ onSearch }: Props) => {
-  const [input, setInput] = useState("");
-
-  const handleSubmit = (e: React.FormEvent) => {
+const SearchBar = ({ onSubmit }: SearchBarProps) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    onSearch(input);
+
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    const query = (formData.get("query") as string).trim();
+
+    if (!query) {
+      toast.error("Please enter a search query!");
+      return;
+    }
+
+    onSubmit(query);
+    form.reset();
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-        type="text"
-        value={input}
-        placeholder="Enter movie title..."
-        onChange={(e) => setInput(e.target.value)}
-      />
+    <form onSubmit={handleSubmit} action="">
+      <input type="text" name="query" placeholder="Enter movie title..." />
       <button type="submit">Search</button>
     </form>
   );
