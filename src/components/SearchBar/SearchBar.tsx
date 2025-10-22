@@ -2,23 +2,21 @@ import type { FormEvent } from "react";
 import toast from "react-hot-toast";
 
 interface SearchBarProps {
-  onSubmit: (query: string) => void;
+  action: (formData: FormData) => void;
 }
 
-const SearchBar = ({ onSubmit }: SearchBarProps) => {
+const SearchBar = ({ action }: SearchBarProps) => {
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     const form = e.currentTarget;
     const formData = new FormData(form);
-    const query = (formData.get("query") as string).trim();
-
-    if (!query) {
-      toast.error("Please enter a search query!");
+    const query = (formData.get("query") as string | null) ?? "";
+    if (!query.trim()) {
+      toast.error("Please enter a search query");
       return;
     }
 
-    onSubmit(query);
+    action(formData);
     form.reset();
   };
 
