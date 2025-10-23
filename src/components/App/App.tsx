@@ -48,15 +48,6 @@ const App: React.FC = () => {
     setPage(1);
   };
 
-  const handleSearchAction = (formData: FormData) => {
-    const q = ((formData.get("query") as string) ?? "").trim();
-    if (!q) {
-      toast.error("Please enter a search query");
-      return;
-    }
-    onSearch(q);
-  };
-
   const handlePageClick = ({ selected }: { selected: number }) => {
     const next = selected + 1;
     if (next !== page) setPage(next);
@@ -67,15 +58,13 @@ const App: React.FC = () => {
     <div className={styles.container}>
       <h1 className={styles.title}>🎬 Movie Search</h1>
 
-      {}
-      <SearchBar action={handleSearchAction} />
+      <SearchBar onSubmit={onSearch} />
 
       {isLoading && <Loader />}
       {isError && <ErrorMessage message="Error fetching movies" />}
 
       {data && data.results && data.results.length > 0 && (
         <>
-          {}
           <ReactPaginate
             breakLabel="..."
             nextLabel="→"
